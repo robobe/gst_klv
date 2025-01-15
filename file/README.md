@@ -1,0 +1,3 @@
+- simple_pipe.py: play x frames to screen
+- simple_pipe_to_file.py: save x frames to file using mp4 container
+- simple_pipe_from_file: play mp4 file
