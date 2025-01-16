@@ -10,15 +10,26 @@ import time
 # Initialize GStreamer
 Gst.init(None)
 
+"""
+gst-launch-1.0 udpsrc port=5000 \
+! 'application/x-rtp, encoding-name=H264, payload=96' \
+! rtph264depay \
+! h264parse \
+! avdec_h264 \
+! videoconvert \
+! fpsdisplaysink sync=false
+"""
+
 # Create the GStreamer pipeline
 pipeline_description = ("""appsrc name=source is-live=true  format=time \
     ! videoconvert \
     ! queue leaky=upstream max-size-buffers=1 \
     ! videorate name=rate \
-    ! capsfilter name=capsfilter caps=video/x-raw,framerate=10/1 \
+    ! capsfilter name=capsfilter caps=video/x-raw,framerate=5/1 \
     ! videoconvert \
-    ! queue \
-    ! fpsdisplaysink sync=false"""
+    ! x264enc tune=zerolatency threads=4 speed-preset=ultrafast \
+    ! rtph264pay \
+    ! udpsink host=127.0.0.1 port=5000 sync=true"""
 )
 pipeline = Gst.parse_launch(pipeline_description)
 
@@ -57,16 +68,32 @@ def push_data():
     push_data.counter
     return True
 
+def change_fps(rate):
+    videorate = pipeline.get_by_name("rate")
+    capsfilter = pipeline.get_by_name("capsfilter")
+    # videorate.get_static_pad("src").set_caps(Gst.Caps.from_string(f"video/x-raw,framerate={rate}/1"))
+    capsfilter.set_property("caps", Gst.Caps.from_string(f"video/x-raw,framerate={rate}/1"))
+def fps_change():
+    try:
+        if fps_change.mode == 10:
+            fps_change.mode = 5
+        else:
+            fps_change.mode = 10
+        print(f"try_to change fps: {fps_change.mode}")
+        GLib.idle_add(change_fps, fps_change.mode)
+    finally:
+        return True
+
 # Initialize the counter for frame timestamps
 push_data.counter = 0
-
+fps_change.mode = 10
 # Start the pipeline
 pipeline.set_state(Gst.State.PLAYING)
 
 # Start pushing frames periodically
 loop = GLib.MainLoop()
 GLib.timeout_add(1000 // framerate, push_data)
-
+GLib.timeout_add(5000, fps_change)
 try:
     print("Playing video with appsrc. Press Ctrl+C to stop.")
     loop.run()

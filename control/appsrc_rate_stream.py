@@ -10,15 +10,26 @@ import time
 # Initialize GStreamer
 Gst.init(None)
 
+"""
+gst-launch-1.0 udpsrc port=5000 \
+! 'application/x-rtp, encoding-name=H264, payload=96' \
+! rtph264depay \
+! h264parse \
+! avdec_h264 \
+! videoconvert \
+! fpsdisplaysink sync=false
+"""
+
 # Create the GStreamer pipeline
 pipeline_description = ("""appsrc name=source is-live=true  format=time \
     ! videoconvert \
     ! queue leaky=upstream max-size-buffers=1 \
     ! videorate name=rate \
-    ! capsfilter name=capsfilter caps=video/x-raw,framerate=10/1 \
+    ! capsfilter name=capsfilter caps=video/x-raw,framerate=5/1 \
     ! videoconvert \
-    ! queue \
-    ! fpsdisplaysink sync=false"""
+    ! x264enc tune=zerolatency threads=4 speed-preset=ultrafast \
+    ! rtph264pay \
+    ! udpsink host=127.0.0.1 port=5000 sync=true"""
 )
 pipeline = Gst.parse_launch(pipeline_description)
 
