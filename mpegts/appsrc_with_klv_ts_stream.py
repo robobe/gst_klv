@@ -16,7 +16,7 @@ Gst.init(None)
 
 # Create the GStreamer pipeline
 pipeline_description = (
-    "mpegtsmux name=mux alignment=7  ! udpsink host=127.0.0.1 port=5000 sync=false \
+    "mpegtsmux name=mux alignment=7  ! udpsink host=127.0.0.1 port=5000 sync=true \
     appsrc name=source is-live=true  format=time ! videoconvert ! queue ! x264enc tune=zerolatency threads=4  ! mux. \
     appsrc name=klv_source is-live=true format=time ! meta/x-klv,parsed=true !  mux. "
 )
@@ -109,7 +109,7 @@ def push_data():
     ## klv buffer
     
     push_data.counter += 1
-    if push_data.counter >= 30:  # Stop after 10 iterations
+    if push_data.counter >= 300:  # Stop after 10 iterations
         print("Exiting timeout loop. send eos")
         appsrc.emit("end-of-stream")
         klv_appsrc.emit("end-of-stream")

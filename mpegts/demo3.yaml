@@ -1,0 +1,13 @@
+session_name: sitl_mavros
+windows:
+  - window_name: mpegts with vide and klv
+    layout: tiled
+    suppress_history: false
+    panes:
+      - shell_command: # send
+          - printf '\033]2;send\033\\'
+          - python mpegts/appsrc_with_klv_ts_stream.py
+          # - gz sim -r sonoma_raceway.world
+      - shell_command: # recv
+          - printf '\033]2;recv\033\\'
+          - python mpegts/play_ts_stream_cairo.py

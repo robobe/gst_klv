@@ -12,6 +12,16 @@ Gst.init(None)
 video_queue = queue.Queue(maxsize=10)
 klv_queue = queue.Queue(maxsize=10)
 
+def parse_klv(klv_data):
+    i = 0
+    while i < len(klv_data):
+        key = klv_data[i]
+        length = klv_data[i + 1]
+        value = klv_data[i + 2 : i + 2 + length]
+        str_value = value.decode('utf-8')
+        i += 2 + length
+    return str_value
+
 def gstreamer_worker():
     # Define the pipeline
     pipeline_description = """
@@ -29,6 +39,7 @@ demux. ! mq. mq. ! meta/x-klv ! appsink name=klv_sink
     for sink in [video_sink, klv_sink]:
         sink.set_property("emit-signals", False)
         sink.set_property("drop", True)
+        # sink.set_property("sync", False)
 
     # Start the pipeline
     pipeline.set_state(Gst.State.PLAYING)
@@ -61,8 +72,9 @@ demux. ! mq. mq. ! meta/x-klv ! appsink name=klv_sink
                 if success:
                     klv_data = bytes(map_info.data)
                     buffer.unmap(map_info)
+                    data = parse_klv(klv_data)
                     try:
-                        klv_queue.put(klv_data, timeout=1)
+                        klv_queue.put(data, timeout=1)
                     except queue.Full:
                         print("KLV queue is full, dropping data")
     except Exception as e:
@@ -74,24 +86,32 @@ demux. ! mq. mq. ! meta/x-klv ! appsink name=klv_sink
 def main():
     thread = threading.Thread(target=gstreamer_worker, daemon=True)
     thread.start()
-
+    data = ""
     try:
         while True:
-            # Process video frames
+             # Process KLV metadata
             try:
-                frame = video_queue.get(timeout=1)
+                klv_data = klv_queue.get(timeout=1)
+                data = str(klv_data)
+                print(f"KLV Data: {klv_data}")
+
+            except queue.Empty:
+                pass
+
+            # Process video frames
+
+            try:
+                fframe = video_queue.get_nowait()
+                frame = fframe.copy()
+                cv2.putText(frame, data, (0,300), cv2.FONT_HERSHEY_SIMPLEX, 2, (255, 255, 255), 3)
+
                 cv2.imshow("Video", frame)
                 if cv2.waitKey(1) & 0xFF == ord("q"):
                     break
             except queue.Empty:
                 print("No video frame received in time")
 
-            # Process KLV metadata
-            try:
-                klv_data = klv_queue.get_nowait()
-                print(f"KLV Data: {klv_data}")
-            except queue.Empty:
-                pass
+           
     except KeyboardInterrupt:
         print("Exiting...")
     finally:
