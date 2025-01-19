@@ -12,7 +12,6 @@ pipeline_description = """
 udpsrc port=5000 ! tsdemux name=demux \
 demux. ! multiqueue name=mq ! video/x-h264 ! decodebin ! videoconvert ! video/x-raw,format=BGR ! appsink name=sink
 demux. ! mq. mq. ! meta/x-klv ! appsink name=klv_sink
-
 """
 
 # GStreamer pipeline
