@@ -1,0 +1,12 @@
+session_name: sitl_mavros
+windows:
+  - window_name: mpegts with vide and klv
+    layout: tiled
+    suppress_history: false
+    panes:
+      - shell_command: # send
+          - printf '\033]2;send\033\\'
+          - python control/appsrc_rate_stream_dynamic_web_cairo.py
+      - shell_command: # player
+          - printf '\033]2;player\033\\'
+          - control/player.sh

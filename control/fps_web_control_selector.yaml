@@ -1,0 +1,14 @@
+session_name: sitl_mavros
+windows:
+  - window_name: gst
+    layout: tiled
+    suppress_history: false
+    panes:
+      - shell_command: # send
+          - printf '\033]2;send\033\\'
+          # - export GST_DEBUG=GST_TRACER:7 
+          # - export GST_TRACERS=latency
+          - python control/appsrc_rate_stream_dynamic_web_cairo_selector.py
+      - shell_command: # player
+          - printf '\033]2;player\033\\'
+          - control/player.sh

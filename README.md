@@ -54,3 +54,15 @@ python /home/user/projects/gst_klv/gst_klv/parse_demo.py
 - [Python code for muxing klv and video (MISB)](https://gist.github.com/All4Gis/509fbe06ce53a0885744d16595811e6f)
 - [KlvOverMpegTSExtractor](https://github.com/shacharmo/KlvOverMpegTSExtractor)
 - [pypi klvdata](https://pypi.org/project/klvdata/)
+
+
+```
+Jon Krohn
+```
+
+pip3 install cuda-python
+https://github.com/NVIDIA-AI-IOT/deepstream_python_apps/blob/master/bindings/README.md
+
+
+cd deepstream_python_apps/bindings
+python3 setup.py install

@@ -1,0 +1,19 @@
+session_name: easy
+windows:
+  - window_name: win1
+    layout: tiled
+    suppress_history: false
+    panes:
+      - shell_command: # send
+          - printf '\033]2;send\033\\'
+      - shell_command: # recv
+          - printf '\033]2;recv\033\\'
+
+  - window_name: win2
+    layout: tiled
+    suppress_history: false
+    panes:
+      - shell_command: # xxx
+          - printf '\033]2;xxx\033\\'
+      - shell_command: # yyy
+          - printf '\033]2;yyy\033\\'

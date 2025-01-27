@@ -15,7 +15,7 @@ import time
 Gst.init(None)
 
 """
-gst-launch-1.0 udpsrc port=5000 \
+gst-launch-1.0 udpsrc port=5000 buffer-size=2048 \
 ! 'application/x-rtp, encoding-name=H264, payload=96' \
 ! rtph264depay \
 ! h264parse \

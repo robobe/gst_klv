@@ -74,9 +74,10 @@ def push_data():
     buf = Gst.Buffer.new_allocate(None, len(data), None)
     buf.fill(0, data)
     push_data.counter += 1
-    buf.pts = buf.dts = Gst.util_uint64_scale(int(push_data.counter * 1e9 / framerate), 1, 1)
-    buf.duration = Gst.util_uint64_scale(int(1e9 / framerate), 1, 1)
-    # buf.duration = 0
+    # buf.pts = buf.dts = Gst.util_uint64_scale(int(push_data.counter * 1e9 / framerate), 1, 1)
+    # buf.duration = Gst.util_uint64_scale(int(1e9 / framerate), 1, 1)
+    buf.pts = buf.dts = 0
+    buf.duration = 0
     # duration_ns = int(1e9 / framerate)
     # buf.pts = buf.dts = push_data.counter * duration_ns
     # buf.duration = duration_ns
